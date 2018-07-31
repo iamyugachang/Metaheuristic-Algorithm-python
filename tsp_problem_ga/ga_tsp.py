@@ -10,6 +10,7 @@ import random
 #range(a,b) --> a <= x < b
 #senario: fitness(), select(), crossover(), mutation()
 #Data structure: chromo_data = {'chromo':[],'distance':[]}
+
 def ran(domain):
     first = 0
     second = 0
@@ -63,12 +64,56 @@ def readfile(dic):
             dic[int(read_element[0])].append(int(read_element[2]))
         f.close()
 
-def fitness(chromo_data):
+def fitness(chromo_data,dic):
+    #clear chromosome distance
+    chromo_data['distance'] = []
+    #calculate distance of each chromosome
+    for i in range(len(chromo_data['chromo'])):
+        chromo_data['distance'].append(evalu(chromo_data['chromo'][i],dic))
     
-    return 
-def select():
-    return final_result_of_all_chromosome_from_the_original_one
-def crossover():
+def select(chromo_data):
+    #score setting
+    score = []
+    peak = []
+    tmp = 0
+    for i in range(len(chromo_data['distance'])):
+        score.append(1/chromo_data['distance'][i])
+    for i in range(len(chromo_data['distance'])):
+        tmp+= (score[i]/sum(score))
+        peak.append(tmp)
+    print(score,peak)
+    #process
+    new_chromo = {'chromo':[],'distance':[]}
+    
+    for i in range(len(chromo_data['distance'])):
+        num = random.random()
+        print(num)
+        mini = 1
+        for i in range(len(chromo_data['distance'])):
+            minus = num-peak[i]
+            if abs(minus) < mini:
+                mini = abs(minus)
+                if minus < 0:
+                    index = i
+                else:
+                    index = i+1
+        new_chromo['chromo'].append(chromo_data['chromo'][index])
+                
+    
+    return new_chromo
+
+def crossover(chromo_data,c_rate):
+    if random.random() > c_rate:
+        return 0
+    new_chromo = {'chromo':[],'distance':[]} 
+    while 1:
+        test1 = chromo_data['chromo'].pop(random.randint(0,len(chromo_data['chromo'])-1))
+        test2 = chromo_data['chromo'].pop(random.randint(0,len(chromo_data['chromo'])-1))
+        index1 = random.randint(0,len(tmp1)-1)
+        index2 = random.randint(0,len(tmp2)-1)
+        new1 = tmp1[index1:index2+1]
+        new2 = tmp2[index1:index2+1]
+        
     #do one of the methods in crossover
     #check crossover probability
     return final_result_of_all_chromosome
