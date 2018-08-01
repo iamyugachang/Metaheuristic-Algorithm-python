@@ -20,13 +20,17 @@ def ran(domain):
         
     return [first,second]
 
-def init(num):
-    seq = []
-    list_1_to_num = list(range(1,num+1))
-    while len(list_1_to_num) > 0:
-        index = random.randint(0,len(list_1_to_num)-1)
-        seq.append(list_1_to_num.pop(index))
-    return seq
+def init(num,chromo_num):
+    chromo_data = {'chromo':[],'distance':[]}
+    
+    for i in range(chromo_num):
+        seq = []
+        list_1_to_num = list(range(1,num+1))
+        while len(list_1_to_num) > 0:
+            index = random.randint(0,len(list_1_to_num)-1)
+            seq.append(list_1_to_num.pop(index))
+        chromo_data['chromo'].append(seq)
+    return chromo_data
 
 def trans(seq):
     temp = seq[:]   
@@ -81,13 +85,13 @@ def select(chromo_data):
     for i in range(len(chromo_data['distance'])):
         tmp+= (score[i]/sum(score))
         peak.append(tmp)
-    print(score,peak)
+   # print(score,peak)
     #process
     new_chromo = {'chromo':[],'distance':[]}
     
     for i in range(len(chromo_data['distance'])):
         num = random.random()
-        print(num)
+        #print(num)
         mini = 1
         for i in range(len(chromo_data['distance'])):
             minus = num-peak[i]
@@ -103,25 +107,64 @@ def select(chromo_data):
     return new_chromo
 
 def crossover(chromo_data,c_rate):
-    if random.random() > c_rate:
-        return 0
-    new_chromo = {'chromo':[],'distance':[]} 
+    new_chromo = {'chromo':[],'distance':[]}
     while 1:
         test1 = chromo_data['chromo'].pop(random.randint(0,len(chromo_data['chromo'])-1))
         test2 = chromo_data['chromo'].pop(random.randint(0,len(chromo_data['chromo'])-1))
-        index1 = random.randint(0,len(tmp1)-1)
-        index2 = random.randint(0,len(tmp2)-1)
-        new1 = tmp1[index1:index2+1]
-        new2 = tmp2[index1:index2+1]
-        
-    #do one of the methods in crossover
-    #check crossover probability
-    return final_result_of_all_chromosome
-def mutation():
-    #do one of the methods in mutation 
-    #check mutation probability
-    return final_result_all_chromosome
-    
+        if random.random() > c_rate:
+            new_chromo['chromo'].append(test1)
+            new_chromo['chromo'].append(test2)
+        else:
+            index1 = random.randint(0,len(test1)-1)
+            index2 = random.randint(0,len(test2)-1)
+            new1 = test1[index1:index2+1]
+            new2 = test2[index1:index2+1]
+            tmp1 = [x for x in test1 if x not in new1]
+            tmp2 = [x for x in test2 if x not in new2]
+            index1 = min(index1,index2)
+            index2 = max(index1,index2)
+            #print(index1,index2)
+            #find order of chromo
+            lookup1 = []
+            lookup2 = []
+            for i in range(len(test1)):
+                lookup1.append(-1)
+                lookup2.append(-1)
+            for i in tmp1:
+                lookup1[test2.index(i)] = i
+            for i in tmp2:
+                lookup2[test1.index(i)] = i
+            #trim -1 from lookup
+            lookup1 = [x for x in lookup1 if x != -1]
+            lookup2 = [x for x in lookup2 if x != -1]
+
+            #paste back lookup to test
+            new1 = lookup1[0:index1]+new1+lookup1[index1:]
+            new2 = lookup2[0:index1]+new2+lookup2[index1:]
+            new_chromo['chromo'].append(new1)
+            new_chromo['chromo'].append(new2)
+        if len(chromo_data['chromo']) < 2:
+            if len(chromo_data['chromo']) == 1:
+                new_chromo['chromo'].append(chromo_data['chromo'].pop())  
+            break
+    return new_chromo
+
+def mutation(chromo_data,m_rate):
+    if random.random() < m_rate:
+        index = random.randint(0,len(chromo_data))
+        tmp = trans(chromo_data['chromo'].pop(index))
+        chromo_data['chromo'].append(tmp)
+    return chromo_data
+def get_average(list):
+    sum = 0
+    for item in list:
+        sum += item
+    return sum/len(list)
+def get_stddev(list):
+    average = get_average(list)
+    sdsq = sum([(i - average) ** 2 for i in list])
+    stdev = (sdsq / (len(list) - 1)) ** .5
+    return stdev    
 
 #initial        
 
@@ -129,7 +172,7 @@ def mutation():
     #dic={a:b}, a是點的編號(type[int]),b是點的座標(type[list]) (Ex:dic={1:[0,1]})
 dic = {}
 readfile(dic)
-
+chromo_num = 20
 iter_num = input('Please enter the iteration:')
 iter_num = int(iter_num)
 
@@ -138,16 +181,21 @@ iter_num = int(iter_num)
 t1 = time.time()
 #Execute
 
-seq = init(len(dic))
-temp = []
+chromo_data = init(len(dic),chromo_num)
+fitness(chromo_data,dic)
 for i in range(1,iter_num+1):  
-    temp = trans(seq)
-    seq = determin(temp,seq,dic)
+    
+    chromo_data = select(chromo_data)
+    chromo_data = crossover(chromo_data,0.5)
+    chromo_data = mutation(chromo_data,0.5)
+    fitness(chromo_data,dic)
+    #print(get_stddev(chromo_data['distance']))
+    #print(chromo_data)
     #result[i] += evalu(seq,dic)
 
 t2 = time.time()        
 print('Time: %.2f (second)(不包含I/O時間)'% (t2-t1))
-       
+print(chromo_data['distance'])       
 
 
 #Calculating average and output
