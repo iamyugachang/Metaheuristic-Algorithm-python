@@ -70,11 +70,13 @@ def readfile(dic):
 
 def fitness(chromo_data,dic):
     #clear chromosome distance
-    chromo_data['distance'] = []
+    new_data = {'chromo':[],'distance':[]}
+    new_data['chromo'] = chromo_data['chromo'][:]
+    
     #calculate distance of each chromosome
     for i in range(len(chromo_data['chromo'])):
-        chromo_data['distance'].append(evalu(chromo_data['chromo'][i],dic))
-    
+        new_data['distance'].append(evalu(chromo_data['chromo'][i],dic))
+    return new_data
 def select(chromo_data):
     #score setting
     score = []
@@ -150,11 +152,16 @@ def crossover(chromo_data,c_rate):
     return new_chromo
 
 def mutation(chromo_data,m_rate):
+    new_data = {'chromo':[],'distance':[]}
+    new_data['chromo'] = chromo_data['chromo'][:]
+        
+    
     if random.random() < m_rate:
-        index = random.randint(0,len(chromo_data))
-        tmp = trans(chromo_data['chromo'].pop(index))
-        chromo_data['chromo'].append(tmp)
-    return chromo_data
+        index = random.randint(0,len(new_data['chromo'])-1)
+        tmp = trans(new_data['chromo'].pop(index))
+        new_data['chromo'].append(tmp)
+ 
+    return new_data
 def get_average(list):
     sum = 0
     for item in list:
@@ -172,7 +179,7 @@ def get_stddev(list):
     #dic={a:b}, a是點的編號(type[int]),b是點的座標(type[list]) (Ex:dic={1:[0,1]})
 dic = {}
 readfile(dic)
-chromo_num = 20
+chromo_num = 5
 iter_num = input('Please enter the iteration:')
 iter_num = int(iter_num)
 
@@ -182,17 +189,20 @@ t1 = time.time()
 #Execute
 
 chromo_data = init(len(dic),chromo_num)
-fitness(chromo_data,dic)
+chromo_data = fitness(chromo_data,dic)
 for i in range(1,iter_num+1):  
     
     chromo_data = select(chromo_data)
     chromo_data = crossover(chromo_data,0.5)
     chromo_data = mutation(chromo_data,0.5)
-    fitness(chromo_data,dic)
+    chromo_data = fitness(chromo_data,dic)
     #print(get_stddev(chromo_data['distance']))
-    #print(chromo_data)
+    #print(chromo_data['distance'])
     #result[i] += evalu(seq,dic)
-
+    
+    
+   
+   
 t2 = time.time()        
 print('Time: %.2f (second)(不包含I/O時間)'% (t2-t1))
 print(chromo_data['distance'])       
