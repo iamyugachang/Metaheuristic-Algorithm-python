@@ -82,10 +82,14 @@ def select(chromo_data,player):
     while len(new_data['chromo']) < len(chromo_data['chromo']):
         tmp = []
         check = []
+        ran_list = []
         while len(tmp) < player:
-            check = chromo_data['chromo'][random.randint(0,len(chromo_data['chromo'])-1)]
-            if check not in tmp:
+            ran = random.randint(0,len(chromo_data['chromo'])-1)
+            if ran not in ran_list:
+                check = chromo_data['chromo'][ran]
                 tmp.append(check)
+            
+                
         best = tmp[0]
         for i in tmp:
             if evalu(i,dic) < evalu(best,dic):
@@ -168,10 +172,10 @@ def get_stddev(list):
     #dic={a:b}, a是點的編號(type[int]),b是點的座標(type[list]) (Ex:dic={1:[0,1]})
 dic = {}
 readfile(dic)
-chromo_num = 5
+chromo_num = 100
 iter_num = input('Please enter the iteration:')
 iter_num = int(iter_num)
-player = 3
+player = 25
 
 
 t1 = time.time()
