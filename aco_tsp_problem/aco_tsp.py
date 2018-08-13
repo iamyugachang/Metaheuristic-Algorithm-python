@@ -79,13 +79,14 @@ def select(destin,pher,sum_pher):
         minus = num-peak[i]
         if abs(minus) < mini:
             mini = abs(minus)
+
             if minus < 0:
                 index = i
             else:
                 index = i+1
     return index
 def update_pher():
-    
+    return 0
 
 def distance(axis):
     return round(math.sqrt(axis[0]*axis[0]+axis[1]*axis[1]))

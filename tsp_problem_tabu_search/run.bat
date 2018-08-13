@@ -1,3 +1,0 @@
-gnuplot
-reset
-pause
