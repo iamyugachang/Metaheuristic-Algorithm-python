@@ -33,48 +33,60 @@ def gen_pher_table(num):
                 table[i][j] = -1
     return table
 
-def find_path():
-
+def find_path(ant_list,location_num,alpha,beta,table,dic):
+    #find path for n ants
+    num = len(ant_list)
+    for ant in ant_list:
+        destination = prob(ant,location_num,alpha,beta,table,dic)
+        ant['path'].append(destination)
+        ant['tabu'].append(destination)
+    
 def prob(ant,num,alpha,beta,table,dic):
     start = ant['path'][-1]
     destin = [x for x in list(range(1,num+1)) if x not in ant['tabu']]
+    print('start:',start)
+    print('destin:',destin)
     pher = []
     sum_pher = 0
     for i in destin:
         delta_x = dic[start][0] - dic[i][0]
         delta_y = dic[start][1] - dic[i][1]
-        add = math.pow(table[start-1][i-1],alpha)*math.pow(distance([delta_x,delta_y])),beta)
+        add = math.pow(table[start-1][i-1],alpha)*math.pow(distance([delta_x,delta_y]),beta)
         pher.append(add)
         sum_pher += add
-    select(destin,pher,sum_pher)
+    print('pher:',pher)
+    index = select(destin,pher,sum_pher)
+    
+    return destin[index]
 
 def select(destin,pher,sum_pher):
     #score setting
     score = []
     peak = []
     tmp = 0
-    for i in range(len(chromo_data['distance'])):
-        score.append(1/chromo_data['distance'][i])
-    for i in range(len(chromo_data['distance'])):
-        tmp+= (score[i]/sum(score))
+    for i in pher:
+        score.append(i/sum_pher)
+        tmp += (i/sum_pher)
         peak.append(tmp)
-   # print(score,peak)
-    #process
-    new_chromo = {'chromo':[],'distance':[]}
     
-    for i in range(len(chromo_data['distance'])):
-        num = random.random()
-        #print(num)
-        mini = 1
-        for i in range(len(chromo_data['distance'])):
-            minus = num-peak[i]
-            if abs(minus) < mini:
-                mini = abs(minus)
-                if minus < 0:
-                    index = i
-                else:
-                    index = i+1
-        new_chromo['chromo'].append(chromo_data['chromo'][index])
+    print('score,peak:',score,peak)
+    #process
+    
+    num = random.random()
+    print('random:',num)
+    mini = 1
+    for i in range(len(peak)):
+        minus = num-peak[i]
+        if abs(minus) < mini:
+            mini = abs(minus)
+            if minus < 0:
+                index = i
+            else:
+                index = i+1
+    return index
+def update_pher():
+    
+
 def distance(axis):
     return round(math.sqrt(axis[0]*axis[0]+axis[1]*axis[1]))
 
@@ -121,7 +133,9 @@ def get_stddev(list):
     #dic={a:b}, a是點的編號(type[int]),b是點的座標(type[list]) (Ex:dic={1:[0,1]})
 dic = {}
 readfile(dic)
-chromo_num = 5
+alpha = 2
+beta = 1
+
 iter_num = input('Please enter the iteration:')
 iter_num = int(iter_num)
 
@@ -129,14 +143,16 @@ iter_num = int(iter_num)
 
 t1 = time.time()
 #Execute
-
+ant_list = gen_ant(len(dic))
+table = gen_pher_table(len(dic))
+find_path(ant_list,len(dic),alpha,beta,table,dic)
 
     
    
    
 t2 = time.time()        
 print('Time: %.2f (second)(不包含I/O時間)'% (t2-t1))
-print(chromo_data['distance'])       
+print(ant_list)       
 
 
 #Calculating average and output
