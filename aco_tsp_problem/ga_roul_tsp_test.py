@@ -44,8 +44,8 @@ def find_path(ant_list,location_num,alpha,beta,table,dic):
 def prob(ant,num,alpha,beta,table,dic):
     start = ant['path'][-1]
     destin = [x for x in list(range(1,num+1)) if x not in ant['tabu']]
-    print('start:',start)
-    print('destin:',destin)
+    #print('start:',start)
+    #print('destin:',destin)
     pher = []
     sum_pher = 0
     for i in destin:
@@ -54,7 +54,7 @@ def prob(ant,num,alpha,beta,table,dic):
         add = math.pow(table[start-1][i-1],alpha)*math.pow(distance([delta_x,delta_y]),beta)
         pher.append(add)
         sum_pher += add
-    print('pher:',pher)
+    #print('pher:',pher)
     index = select(destin,pher,sum_pher)
     
     return destin[index]
@@ -69,17 +69,16 @@ def select(destin,pher,sum_pher):
         tmp += (i/sum_pher)
         peak.append(tmp)
     
-    print('score,peak:',score,peak)
+    #print('score,peak:',score,peak)
     #process
     
     num = random.random()
-    print('random:',num)
+    #print('random:',num)
     mini = 1
     for i in range(len(peak)):
         minus = num-peak[i]
         if abs(minus) < mini:
             mini = abs(minus)
-
             if minus < 0:
                 index = i
             else:
@@ -118,6 +117,7 @@ def update_pher(ant_list,table,d_rate,dic):
                     add = tmp_table[row][col] + tmp_table[row][col]
                     table[row][col] = (1-d_rate)*tmp + add
     return table
+        
 
 def distance(axis):
     return round(math.sqrt(axis[0]*axis[0]+axis[1]*axis[1]))
@@ -138,7 +138,7 @@ def determin(ant_list,dic,best_ant):
     for ant in ant_list:
         if evalu(ant['path'],dic) < evalu(best_ant['path'],dic):
             best_ant = ant
-    return best_ant   
+    return best_ant
             
 def readfile(dic):
     with open('eil51.txt') as f:
@@ -175,7 +175,7 @@ iter_num = input('Please enter the iteration:')
 iter_num = int(iter_num)
 
 
-
+dic = {1:[0,0],2:[3,4],3:[5,11],4:[7,24],5:[1,2],6:[8,17]}
 t1 = time.time()
 #Execute
 table = gen_pher_table(len(dic))
@@ -203,7 +203,7 @@ for i in range(iter_num):
 t2 = time.time()        
 print('Time: %.2f (second)(不包含I/O時間)'% (t2-t1))
 print('ant_list:',ant_list)
-print('distance:',evalu(best_ant['path'],dic))  
+print('distance:',evalu(best_ant['path'],dic))
 
 
 #Calculating average and output
