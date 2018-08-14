@@ -44,8 +44,8 @@ def find_path(ant_list,location_num,alpha,beta,table,dic):
 def prob(ant,num,alpha,beta,table,dic):
     start = ant['path'][-1]
     destin = [x for x in list(range(1,num+1)) if x not in ant['tabu']]
-    print('start:',start)
-    print('destin:',destin)
+    #print('start:',start)
+    #print('destin:',destin)
     pher = []
     sum_pher = 0
     for i in destin:
@@ -54,7 +54,7 @@ def prob(ant,num,alpha,beta,table,dic):
         add = math.pow(table[start-1][i-1],alpha)*math.pow(distance([delta_x,delta_y]),beta)
         pher.append(add)
         sum_pher += add
-    print('pher:',pher)
+    #print('pher:',pher)
     index = select(destin,pher,sum_pher)
     
     return destin[index]
@@ -69,11 +69,11 @@ def select(destin,pher,sum_pher):
         tmp += (i/sum_pher)
         peak.append(tmp)
     
-    print('score,peak:',score,peak)
+    #print('score,peak:',score,peak)
     #process
     
     num = random.random()
-    print('random:',num)
+    #print('random:',num)
     mini = 1
     for i in range(len(peak)):
         minus = num-peak[i]
@@ -165,7 +165,7 @@ def get_stddev(list):
 #initial        
 
 
-    #dic={a:b}, a是點的編號(type[int]),b是點的座標(type[list]) (Ex:dic={1:[0,1]})
+#dic={a:b}, a是點的編號(type[int]),b是點的座標(type[list]) (Ex:dic={1:[0,1]})
 dic = {}
 readfile(dic)
 alpha = 2
@@ -202,7 +202,7 @@ for i in range(iter_num):
    
 t2 = time.time()        
 print('Time: %.2f (second)(不包含I/O時間)'% (t2-t1))
-print('ant_list:',ant_list)
+#print('ant_list:',ant_list)
 print('distance:',evalu(best_ant['path'],dic))  
 
 
