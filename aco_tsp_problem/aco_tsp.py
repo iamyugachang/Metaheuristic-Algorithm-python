@@ -2,6 +2,7 @@ import sys
 import time
 import math
 import random
+import PyGnuplot as gp
 #transition     任兩個互換
 #evalutation    連線距離和 
 #determination  距離短者獲勝
@@ -28,13 +29,13 @@ def gen_pher_table(num):
     for i in seq:
         table.append([])
         for j in seq:
-            table[i].append(100)
-            if i == j:
+            table[i].append(10)
+            if i >= j:
                 table[i][j] = -1
     return table
 
 def find_path(ant_list,location_num,alpha,beta,table,dic):
-    #find path for n ants
+    #find path for n ants only one step
     num = len(ant_list)
     for ant in ant_list:
         destination = prob(ant,location_num,alpha,beta,table,dic)
@@ -51,10 +52,11 @@ def prob(ant,num,alpha,beta,table,dic):
     for i in destin:
         delta_x = dic[start][0] - dic[i][0]
         delta_y = dic[start][1] - dic[i][1]
-        add = math.pow(table[start-1][i-1],alpha)*math.pow(distance([delta_x,delta_y]),beta)
+        add = math.pow(table[start-1][i-1],alpha)*math.pow(1/distance([delta_x,delta_y]),beta)
         pher.append(add)
         sum_pher += add
     #print('pher:',pher)
+    
     index = select(destin,pher,sum_pher)
     
     return destin[index]
@@ -106,7 +108,7 @@ def update_pher(ant_list,table,d_rate,dic):
             #print('nex:',col)
             delta_x = dic[row][0] - dic[col][0]
             delta_y = dic[row][1] - dic[col][1]
-            tmp_table[row-1][col-1] += (ant['pher']/pow(distance([delta_x,delta_y]),2))
+            tmp_table[row-1][col-1] += round((ant['pher']/pow(distance([delta_x,delta_y]),2)),2)
             #print(tmp_table[row-1][col-1])
     #update pheromne table
     #print(tmp_table)
@@ -116,7 +118,7 @@ def update_pher(ant_list,table,d_rate,dic):
                 if row < col:
                     tmp = table[row][col]
                     add = tmp_table[row][col] + tmp_table[row][col]
-                    table[row][col] = (1-d_rate)*tmp + add
+                    table[row][col] = round((1-d_rate)*tmp + add,2)
     return table
 
 def distance(axis):
@@ -161,7 +163,12 @@ def get_stddev(list):
     sdsq = sum([(i - average) ** 2 for i in list])
     stdev = (sdsq / (len(list) - 1)) ** .5
     return stdev    
-
+def output_table(table):
+    #   +----+----+-------------+
+    #   |   0|   1| 2|  3|  4|
+    num = len(table)
+    
+    return 0
 #initial        
 
 
@@ -180,11 +187,35 @@ t1 = time.time()
 #Execute
 table = gen_pher_table(len(dic))
 ant_list = gen_ant(len(dic))
+
+#generate ant path file
+for ant in ant_list:
+    filename = 'data/'+str(ant['id'])+'.txt'
+    with open(filename,'w') as f:
+        f.truncate(0)
+        f.close()
+
 while len(ant_list[0]['path']) <len(dic):
         find_path(ant_list,len(dic),alpha,beta,table,dic)
+#write ant path into file
+#for ant in ant_list:
+#    filename = 'data/'+str(ant['id'])+'.txt'
+#    for i in range(len(ant['path'])):
+#        with open(filename,'a') as f:
+            
+#            f.write(str(dic[ant['path'][i]][0]))
+#            f.write(' ')
+#            f.write(str(dic[ant['path'][i]][1]))
+#            f.write('\n')
+#            f.close()
+            
 best_ant = ant_list[0]
 best_ant = determin(ant_list,dic,best_ant)    
 for i in range(iter_num):
+    filename = 'data/best.txt'
+    with open(filename,'w') as f:
+           f.truncate(0)
+           f.close()
     ant_list = gen_ant(len(dic))
     
     while len(ant_list[0]['path']) <len(dic):
@@ -193,7 +224,17 @@ for i in range(iter_num):
     better_ant = determin(ant_list,dic,best_ant)
     if evalu(better_ant['path'],dic) < evalu(best_ant['path'],dic):
         best_ant = better_ant
-        
+    #write best ant path
+    filename = 'data/best.txt'
+    for i in range(len(best_ant['path'])+1):
+        with open(filename,'a') as f:
+            
+            f.write(str(dic[best_ant['path'][i%len(best_ant['path'])]][0]))
+            f.write(' ')
+            f.write(str(dic[best_ant['path'][i%len(best_ant['path'])]][1]))
+            f.write('\n')
+            f.close()
+    gp.c('plot "data/best.txt" u 1:2 with linespoints linewidth 2')    
     print('distance:',evalu(best_ant['path'],dic))
     table = update_pher(ant_list,table,d_rate,dic)
 
