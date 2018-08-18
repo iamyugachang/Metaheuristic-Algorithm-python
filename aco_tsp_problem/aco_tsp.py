@@ -164,10 +164,15 @@ def get_stddev(list):
     stdev = (sdsq / (len(list) - 1)) ** .5
     return stdev    
 def output_table(table):
-    #   +----+----+-------------+
-    #   |   0|   1| 2|  3|  4|
+    #   +-----+-----+-------------+
+    #   |90.89| 9.89| 2|  3|  4|
     num = len(table)
-    
+    #print border
+    for i in range(num):
+        if i == num-1:
+            print('+-----+')
+        print('+-----')
+        
     return 0
 #initial        
 
@@ -197,21 +202,23 @@ for ant in ant_list:
 
 while len(ant_list[0]['path']) <len(dic):
         find_path(ant_list,len(dic),alpha,beta,table,dic)
-#write ant path into file
-#for ant in ant_list:
-#    filename = 'data/'+str(ant['id'])+'.txt'
-#    for i in range(len(ant['path'])):
-#        with open(filename,'a') as f:
+'''
+write ant path into file
+for ant in ant_list:
+    filename = 'data/'+str(ant['id'])+'.txt'
+    for i in range(len(ant['path'])):
+        with open(filename,'a') as f:
             
-#            f.write(str(dic[ant['path'][i]][0]))
-#            f.write(' ')
-#            f.write(str(dic[ant['path'][i]][1]))
-#            f.write('\n')
-#            f.close()
-            
+            f.write(str(dic[ant['path'][i]][0]))
+            f.write(' ')
+            f.write(str(dic[ant['path'][i]][1]))
+            f.write('\n')
+            f.close()
+'''
+
 best_ant = ant_list[0]
 best_ant = determin(ant_list,dic,best_ant)    
-for i in range(iter_num):
+for k in range(iter_num):
     filename = 'data/best.txt'
     with open(filename,'w') as f:
            f.truncate(0)
@@ -234,9 +241,33 @@ for i in range(iter_num):
             f.write(str(dic[best_ant['path'][i%len(best_ant['path'])]][1]))
             f.write('\n')
             f.close()
+    gp.c('set terminal qt 0')
     gp.c('plot "data/best.txt" u 1:2 with linespoints linewidth 2')    
     print('distance:',evalu(best_ant['path'],dic))
     table = update_pher(ant_list,table,d_rate,dic)
+
+    #Draw 3D pheromone graph
+    filename = 'data/pher_table.txt'
+    with open(filename,'w') as f:
+        f.truncate(0)
+        f.close()
+    for row in range(len(table)):
+        for col in range(len(table[row])):
+            with open(filename,'a') as f:
+                f.write(str(col+1))
+                f.write(' ')
+                f.write(str(row+1))
+                f.write(' ')
+                f.write(str(table[row][col]))
+                f.write('\n')
+                f.close()
+    gp.c('set terminal qt 1')
+    gp.c('set xrange [1:51]')
+    gp.c('set yrange [1:51]')
+    gp.c('set dgrid3d 30,30')
+    gp.c('set hidden3d')
+    gp.c('splot "data/pher_table.txt" u 1:2:3 with lines')
+    gp.p('img/'+str(k)+'.png')
 
     
    
