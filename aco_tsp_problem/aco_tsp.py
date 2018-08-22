@@ -2,7 +2,7 @@ import sys
 import time
 import math
 import random
-import PyGnuplot as gp
+#import PyGnuplot as gp
 #transition     任兩個互換
 #evalutation    連線距離和 
 #determination  距離短者獲勝
@@ -29,18 +29,21 @@ def gen_pher_table(num):
     for i in seq:
         table.append([])
         for j in seq:
-            table[i].append(10)
+            table[i].append(0.000167)
             if i >= j:
                 table[i][j] = -1
     return table
 
 def find_path(ant_list,location_num,alpha,beta,table,dic):
     #find path for n ants only one step
-    num = len(ant_list)
-    for ant in ant_list:
-        destination = prob(ant,location_num,alpha,beta,table,dic)
-        ant['path'].append(destination)
-        ant['tabu'].append(destination)
+    #num = len(ant_list)
+    
+    while len(ant_list[0]['path']) < location_num:
+        
+        for ant in ant_list:
+            destination = prob(ant,location_num,alpha,beta,table,dic)
+            ant['path'].append(destination)
+            ant['tabu'].append(destination)
     
 def prob(ant,num,alpha,beta,table,dic):
     start = ant['path'][-1]
@@ -48,30 +51,33 @@ def prob(ant,num,alpha,beta,table,dic):
     #print('start:',start)
     #print('destin:',destin)
     pher = []
-    sum_pher = 0
+    
     for i in destin:
         delta_x = dic[start][0] - dic[i][0]
         delta_y = dic[start][1] - dic[i][1]
         add = math.pow(table[start-1][i-1],alpha)*math.pow(1/distance([delta_x,delta_y]),beta)
         pher.append(add)
-        sum_pher += add
+        
     #print('pher:',pher)
     
-    index = select(destin,pher,sum_pher)
+    index = select(pher)
+
     
     return destin[index]
 
-def select(destin,pher,sum_pher):
+def select(pher):
     #score setting
     score = []
     peak = []
     tmp = 0
+    index = 0
+    sum_pher = sum(pher)
     for i in pher:
         score.append(i/sum_pher)
         tmp += (i/sum_pher)
         peak.append(tmp)
     
-    #print('score,peak:',score,peak)
+    #print('peak:',peak)
     #process
     
     num = random.random()
@@ -86,6 +92,7 @@ def select(destin,pher,sum_pher):
                 index = i
             else:
                 index = i+1
+                
     return index
 def update_pher(ant_list,table,d_rate,dic):
     #generate temp table
@@ -100,6 +107,7 @@ def update_pher(ant_list,table,d_rate,dic):
     for ant in ant_list:
         path = ant['path']
         #analyze path
+        #ex: [1,2,3,4,5]
         #print('path:',path)
         for i in range(len(path)):
             row = path[i]
@@ -108,17 +116,16 @@ def update_pher(ant_list,table,d_rate,dic):
             #print('nex:',col)
             delta_x = dic[row][0] - dic[col][0]
             delta_y = dic[row][1] - dic[col][1]
-            tmp_table[row-1][col-1] += round((ant['pher']/pow(distance([delta_x,delta_y]),2)),2)
+            tmp_table[row-1][col-1] += (ant['pher']/pow(distance([delta_x,delta_y]),2))
             #print(tmp_table[row-1][col-1])
     #update pheromne table
     #print(tmp_table)
     for row in range(len(table)):
         for col in range(len(table[row])):
-            if row != col:
-                if row < col:
-                    tmp = table[row][col]
-                    add = tmp_table[row][col] + tmp_table[row][col]
-                    table[row][col] = round((1-d_rate)*tmp + add,2)
+            if row < col:
+                tmp = table[row][col]
+                add = tmp_table[row][col] + tmp_table[col][row]
+                table[row][col] = (1-d_rate)*tmp + add
     return table
 
 def distance(axis):
@@ -135,12 +142,14 @@ def evalu(seq,dic):
     return dist
 
 def determin(ant_list,dic,best_ant):
-    #best_ant = ant_list[0]
     
+    best_distance = evalu(best_ant['path'],dic)
     for ant in ant_list:
-        if evalu(ant['path'],dic) < evalu(best_ant['path'],dic):
+        dist = evalu(ant['path'],dic)
+        if  dist < best_distance:
             best_ant = ant
-    return best_ant   
+            best_distance = dist
+    return best_ant 
             
 def readfile(dic):
     with open('eil51.txt') as f:
@@ -164,14 +173,7 @@ def get_stddev(list):
     stdev = (sdsq / (len(list) - 1)) ** .5
     return stdev    
 def output_table(table):
-    #   +-----+-----+-------------+
-    #   |90.89| 9.89| 2|  3|  4|
-    num = len(table)
-    #print border
-    for i in range(num):
-        if i == num-1:
-            print('+-----+')
-        print('+-----')
+    
         
     return 0
 #initial        
@@ -180,8 +182,8 @@ def output_table(table):
 #dic={a:b}, a是點的編號(type[int]),b是點的座標(type[list]) (Ex:dic={1:[0,1]})
 dic = {}
 readfile(dic)
-alpha = 2
-beta = 1
+alpha = 1
+beta = 2
 d_rate = 0.1
 iter_num = input('Please enter the iteration:')
 iter_num = int(iter_num)
@@ -189,10 +191,9 @@ iter_num = int(iter_num)
 
 
 t1 = time.time()
-#Execute
-table = gen_pher_table(len(dic))
-ant_list = gen_ant(len(dic))
+#Executtion
 
+'''
 #generate ant path file
 for ant in ant_list:
     filename = 'data/'+str(ant['id'])+'.txt'
@@ -202,7 +203,7 @@ for ant in ant_list:
 
 while len(ant_list[0]['path']) <len(dic):
         find_path(ant_list,len(dic),alpha,beta,table,dic)
-'''
+
 write ant path into file
 for ant in ant_list:
     filename = 'data/'+str(ant['id'])+'.txt'
@@ -216,21 +217,28 @@ for ant in ant_list:
             f.close()
 '''
 
-best_ant = ant_list[0]
-best_ant = determin(ant_list,dic,best_ant)    
+best_ant = {'path':list(range(1,len(dic)+1))}
+table = gen_pher_table(len(dic))
+filename = 'data/pher_table.txt'
+
 for k in range(iter_num):
+    with open(filename,'w') as f:
+        f.truncate(0)
+        f.close()
+    '''
     filename = 'data/best.txt'
     with open(filename,'w') as f:
            f.truncate(0)
            f.close()
+    '''
     ant_list = gen_ant(len(dic))
     
-    while len(ant_list[0]['path']) <len(dic):
-        find_path(ant_list,len(dic),alpha,beta,table,dic)
     
-    better_ant = determin(ant_list,dic,best_ant)
-    if evalu(better_ant['path'],dic) < evalu(best_ant['path'],dic):
-        best_ant = better_ant
+    find_path(ant_list,len(dic),alpha,beta,table,dic)
+    best_ant = determin(ant_list,dic,best_ant)
+    
+    
+    '''    
     #write best ant path
     filename = 'data/best.txt'
     for i in range(len(best_ant['path'])+1):
@@ -243,9 +251,22 @@ for k in range(iter_num):
             f.close()
     gp.c('set terminal qt 0')
     gp.c('plot "data/best.txt" u 1:2 with linespoints linewidth 2')    
-    print('distance:',evalu(best_ant['path'],dic))
+'''
+    if k%100 ==0:
+        print('distance:',evalu(best_ant['path'],dic))
+    
     table = update_pher(ant_list,table,d_rate,dic)
-
+    
+    with open(filename,'a') as f:
+        for i in range(len(table)):
+            for j in range(len(table[i])):
+                f.write(str(table[i][j]))
+                f.write(' ')
+            f.write('\n')
+    f.close()
+    
+    
+'''
     #Draw 3D pheromone graph
     filename = 'data/pher_table.txt'
     with open(filename,'w') as f:
@@ -261,13 +282,14 @@ for k in range(iter_num):
                 f.write(str(table[row][col]))
                 f.write('\n')
                 f.close()
-    gp.c('set terminal qt 1')
+    gp.c('set terminal qt '+str(k))
     gp.c('set xrange [1:51]')
     gp.c('set yrange [1:51]')
     gp.c('set dgrid3d 30,30')
     gp.c('set hidden3d')
     gp.c('splot "data/pher_table.txt" u 1:2:3 with lines')
-    gp.p('img/'+str(k)+'.png')
+    #gp.c('set output "123.png"')
+'''    
 
     
    
