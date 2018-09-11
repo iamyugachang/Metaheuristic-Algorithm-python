@@ -37,7 +37,6 @@ def gen_pher_table(num):
 def find_path(ant_list,location_num,alpha,beta,table,dic):
     #find path for n ants only one step
     #num = len(ant_list)
-    '''
     with open('data_test/log.txt','a') as f:
         f.write('current table:\n')
         for i in range(len(table)):
@@ -46,27 +45,24 @@ def find_path(ant_list,location_num,alpha,beta,table,dic):
                 f.write('   ')
             f.write('\n')
         f.close()
-    '''
     while len(ant_list[0]['path']) < location_num:
         
         for ant in ant_list:
             destination = prob(ant,location_num,alpha,beta,table,dic)
             ant['path'].append(destination)
             ant['tabu'].append(destination)
-        '''
         with open('data_test/log.txt','a') as f:
             f.write('current ant_list'+str(ant_list)+'\n')
             f.close()
-        '''    
+            
     
 def prob(ant,num,alpha,beta,table,dic):
     start = ant['path'][-1]
     destin = [x for x in list(range(1,num+1)) if x not in ant['tabu']]
-    '''
     with open('data_test/log.txt','a') as f:
         f.write('from '+str(start)+' to '+str(destin)+'\n')
         f.close()
-    '''    
+        
     #print('start:',start)
     #print('destin:',destin)
     pher = []
@@ -83,11 +79,10 @@ def prob(ant,num,alpha,beta,table,dic):
     #print('pher:',pher)
     
     index = select(pher)
-    '''
     with open('data_test/log.txt','a') as f:
         f.write('index chosen:'+str(index)+'\n')
         f.close()
-    '''
+    
     return destin[index]
 
 def select(pher):
@@ -106,13 +101,11 @@ def select(pher):
     #process
     
     num = random.random()
-    '''
     with open('data_test/log.txt','a') as f:
         f.write('pher: '+str(pher)+'\n')
         f.write('peak: '+str(peak)+'\n')
         f.write('random number: '+str(num)+'\n')
         f.close()
-    '''
     #print('random:',num)
     mini = 1
     for i in range(len(peak)):
@@ -164,7 +157,6 @@ def update_pher(ant_list,table,d_rate,dic):
                 tmp = table[row][col]
                 add = tmp_table[row][col] + tmp_table[col][row]
                 table[row][col] = (1-d_rate)*tmp + add
-    '''
     with open('data_test/log.txt','a') as f:
         f.write('test table:\n')
         for i in range(len(test_table)):
@@ -185,7 +177,6 @@ def update_pher(ant_list,table,d_rate,dic):
                 f.write('   ')
             f.write('\n')
         f.close()
-    '''
     return table
 
 def distance(axis):
@@ -212,8 +203,8 @@ def determin(ant_list,dic,best_ant):
     return best_ant 
             
 def readfile(dic):
-    with open('eil51.txt') as f:
-    #with open('test.txt') as f:
+    #with open('eil51.txt') as f:
+    with open('test.txt') as f:
         r = f.read()
         read_line = r.split('\n')               
         for i in range(len(read_line)):         
@@ -280,12 +271,10 @@ for ant in ant_list:
 
 best_ant = {'path':list(range(1,len(dic)+1))}
 table = gen_pher_table(len(dic))
-'''
 filename = 'data_test/log.txt'
 with open(filename,'w') as f:
     f.truncate(0)
     f.close()
-'''
     
 for k in range(iter_num):
     '''
