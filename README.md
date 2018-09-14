@@ -1,1 +1,1 @@
-# algor-practice
+# algor-practice for personal practice
